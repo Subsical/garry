@@ -6,12 +6,12 @@ Garry is a Discord bot operated for a single Discord server. This policy explain
 
 ## Data We Store
 
-Garry stores a minimal amount of data locally, in a database used only by the bot:
+Garry stores a minimal amount of data locally, in an encrypted database used only by the bot:
 
 - **The Discord User ID of the current "Garry"** — the member currently holding the rotating Garry role.
 - **A timestamp** of when the role was last assigned.
 
-No message content, message history, or other personal data is stored in this database.
+This database is encrypted at rest and stored on the server that runs the bot (a privately-managed Ubuntu VPS hosted with Hetzner). No message content, message history, or other personal data is stored in this database.
 
 ## Data We Access But Do Not Store
 
@@ -40,3 +40,4 @@ If this policy changes, the "Last updated" date at the top will be revised. Cont
 ## Contact
 
 Discord: @.subs
+Emai: subsical@gmail.com

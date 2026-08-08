@@ -1,16 +1,17 @@
 import asyncio
 import os
 import random
-import sqlite3
 from datetime import datetime, timedelta
 
 import discord
+import sqlcipher3 as sqlite3
 from discord import app_commands
 from discord.ext import commands, tasks
 
 bot = commands.Bot(command_prefix='!', intents=discord.Intents.all(), help_command=None)
 
 conn = sqlite3.connect('garry.db')
+conn.execute(f"PRAGMA key = \"x'{os.environ['GARRY_DB_KEY']}'\"")
 cur = conn.cursor()
 
 with open('blacklist.txt') as f:

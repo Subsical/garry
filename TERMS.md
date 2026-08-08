@@ -35,3 +35,4 @@ If these terms change, the "Last updated" date at the top will be revised. Conti
 ## Contact
 
 Discord: @.subs
+Emai: subsical@gmail.com
