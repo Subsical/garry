@@ -11,8 +11,8 @@ from discord.ext import commands, tasks
 bot = commands.Bot(command_prefix='!', intents=discord.Intents.all(), help_command=None)
 
 conn = sqlite3.connect('garry.db')
-conn.execute(f"PRAGMA key = \"x'{os.environ['GARRY_DB_KEY']}'\"")
 cur = conn.cursor()
+cur.execute(f"PRAGMA key=\"{os.environ['GARRY_DB_KEY']}\"")
 
 with open('blacklist.txt') as f:
 	BLACKLIST = [int(line) for line in f.read().split()]
