@@ -1,0 +1,7 @@
+__pycache__/
+.vscode/
+*.db
+*.txt
+*.pyc
+Dockerfile
+.env
