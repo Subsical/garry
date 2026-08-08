@@ -28,6 +28,7 @@ IGNORED_EDIT_ROLES = [1381251184630960288, 1378494048586825809, 1373107494913573
 
 @bot.event
 async def on_ready():
+	await bot.tree.sync(guild=discord.Object(id=GUILD_ID))
 	print("---OUTPUT----------\nGarry is here.")
 	garry.start()
 
