@@ -6,7 +6,7 @@ These terms govern your use of Garry, a Discord bot operated for a single Discor
 
 ## The Service
 
-Garry runs an automated role-rotation game: it periodically selects an eligible member of the server to hold the "Garry" role for a set period, relays their messages in a designated channel to a public archive channel, and manages related permissions and message-edit restrictions. Garry is provided as-is, for entertainment purposes within the server it operates in.
+Garry runs an automated role-rotation game: it periodically selects an eligible member of the server to hold the "Garry" role for a set period, relays their one allowed message in a designated channel to a private archive channel, and deletes any later edits to messages in that channel to prevent the historical record from being altered after the fact. Garry is provided as-is, for entertainment purposes within the server it operates in.
 
 ## Eligibility & Server Rules
 
