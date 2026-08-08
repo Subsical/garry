@@ -10,16 +10,23 @@ from discord.ext import commands, tasks
 
 bot = commands.Bot(command_prefix='!', intents=discord.Intents.all(), help_command=None)
 
-guild: discord.Guild = bot.get_guild(1373106664785580032)
 conn = sqlite3.connect('garry.db')
 cur = conn.cursor()
 
 with open('blacklist.txt') as f:
 	BLACKLIST = [int(line) for line in f.read().split()]
 
-@tasks.loop(count=1)
-async def wait_until_ready():
-	await bot.wait_until_ready()
+GUILD_ID = 1373106664785580032
+GARRY_ROLE_ID = 1395927802171232366
+VERIFIED_ROLE_ID = 1373107349669281792
+MUTED_ROLE_ID = 1381107817498284144
+NOMINATED_ROLE_ID = 1407109877935116408
+GARRY_CHANNEL_ID = 1381108247687200849
+GARRY_HISTORY_CHANNEL_ID = 1400498446594478221
+IGNORED_EDIT_ROLES = [1381251184630960288, 1378494048586825809, 1373107494913573084, 1387495886720073818, 1373788332051529738, 1378093307066056736, GARRY_ROLE_ID]
+
+@bot.event
+async def on_ready():
 	print("---OUTPUT----------\nGarry is here.")
 	garry.start()
 
@@ -66,28 +73,26 @@ GARRY_DELAY = timedelta(hours=1)
 
 @tasks.loop(seconds=5)
 async def garry():
-	guild = bot.get_guild(1373106664785580032)
-	garry_role = guild.get_role(1395927802171232366)
-	verified_role = guild.get_role(1373107349669281792)
-	muted_role = guild.get_role(1381107817498284144)
+	guild = bot.get_guild(GUILD_ID)
+	garry_role = guild.get_role(GARRY_ROLE_ID)
+	verified_role = guild.get_role(VERIFIED_ROLE_ID)
+	muted_role = guild.get_role(MUTED_ROLE_ID)
 	try:
 		cur.execute("SELECT cur_garry_id FROM Garry")
 		cur_garry_id, = cur.fetchone()
-		conn.commit()
 		cur_garry = guild.get_member(cur_garry_id)
 		no_one_garry = False
 	except IndexError:
 		cur_garry = guild.get_member(bot.user.id)  # if the garry left, pretend bot was garry
 		no_one_garry = True
-	
+
 	if cur_garry is None or not hasattr(cur_garry, "status"):
 		cur_garry = guild.get_member(bot.user.id)
 		no_one_garry = True
 
-	expected_garry_id = bot.user.id if no_one_garry else cur_garry_id
 	for member in garry_role.members:
-		if member.id != expected_garry_id:
-			print(f"!! {member} has the garry role but isn't the current garry ({expected_garry_id}) -- removing")
+		if member.id != cur_garry.id:
+			print(f"!! {member} has the garry role but isn't the current garry ({cur_garry.id}) -- removing")
 			try:
 				await member.remove_roles(garry_role)
 			except (discord.Forbidden, discord.HTTPException) as err:
@@ -95,8 +100,8 @@ async def garry():
 
 	global last_picked
 	if no_one_garry or datetime.now() >= last_picked + GARRY_DELAY:
-		garry_chnl = guild.get_channel(1381108247687200849)
-		nominated = guild.get_role(1407109877935116408)
+		garry_chnl = guild.get_channel(GARRY_CHANNEL_ID)
+		nominated = guild.get_role(NOMINATED_ROLE_ID)
 		nominees = list(nominated.members)
 		random.shuffle(nominees)
 
@@ -130,9 +135,7 @@ async def garry():
 		await garry_chnl.send(f"{next_garry.mention}, you are now garry for one hour.")
 		print(f"{next_garry} is garry now")
 		last_picked = datetime.now()
-		last_picked_iso = datetime.now().isoformat()
-		cur.execute("UPDATE Garry SET last_picked = ?", (last_picked_iso,))
-		cur.execute("UPDATE Garry SET cur_garry_id = ?", (next_garry.id,))
+		cur.execute("UPDATE Garry SET last_picked = ?, cur_garry_id = ?", (last_picked.isoformat(), next_garry.id))
 		conn.commit()
 
 @garry.error
@@ -150,34 +153,32 @@ async def garry_error(err: Exception):
 
 @bot.event
 async def on_raw_message_edit(payload: discord.RawMessageUpdateEvent):
-	if payload.guild_id and payload.channel_id == 1381108247687200849 and isinstance(payload.data, dict) and "edited_timestamp" in payload.data:
+	if payload.guild_id and payload.channel_id == GARRY_CHANNEL_ID and isinstance(payload.data, dict) and "edited_timestamp" in payload.data:
 		guild = bot.get_guild(payload.guild_id)
 		channel = guild.get_channel(payload.channel_id)
 		if channel is not None:
 			message = await channel.fetch_message(payload.message_id)
-			ignored_roles = [1381251184630960288, 1378494048586825809, 1373107494913573084, 1387495886720073818, 1373788332051529738, 1378093307066056736, 1395927802171232366]
 			ignored_members = [target.id for target, overwrite in channel.overwrites.items() if isinstance(target, discord.Member) and overwrite.send_messages is True]
-			if message.edited_at is not None and message.author.id not in ignored_members and not any(role.id in ignored_roles for role in message.author.roles):
+			if message.edited_at is not None and message.author.id not in ignored_members and not any(role.id in IGNORED_EDIT_ROLES for role in message.author.roles):
 				await message.delete()
 
 @bot.event
 async def on_message(message: discord.Message):
 	# await bot.process_commands(message)
-	guild = bot.get_guild(1373106664785580032)
-	if message.channel.id == 1381108247687200849:
-		garry_role = guild.get_role(1395927802171232366)
+	guild = bot.get_guild(GUILD_ID)
+	if message.channel.id == GARRY_CHANNEL_ID:
+		garry_role = guild.get_role(GARRY_ROLE_ID)
 		if garry_role in message.author.roles:
 			cur.execute("SELECT cur_garry_id FROM Garry")
 			cur_garry_id, = cur.fetchone()
-			conn.commit()
 			if cur_garry_id == message.author.id:
 				overwrite = message.channel.overwrites_for(garry_role)
 				overwrite.send_messages = False
 				await message.channel.set_permissions(garry_role, overwrite=overwrite)
 
-				garry_history = guild.get_channel(1400498446594478221)
+				garry_history = guild.get_channel(GARRY_HISTORY_CHANNEL_ID)
 				webhook = discord.utils.get(await garry_history.webhooks(), name='garry history')
-				file_attachments = [await attachment.to_file() for attachment in message.attachments]
+				file_attachments = await asyncio.gather(*(attachment.to_file() for attachment in message.attachments))
 				content = message.clean_content or None
 				await webhook.send(content=content, files=file_attachments, username=message.author.display_name, avatar_url=message.author.display_avatar.url)
 				await asyncio.sleep(5)  # to make sure the other message is sent first
@@ -185,13 +186,8 @@ async def on_message(message: discord.Message):
 
 ########## ======================================================================== ##########
 
-
-
-
-
 async def main():
 	async with bot:
-		wait_until_ready.start()
 		await bot.start(os.environ["GARRY_BOT_TOKEN"])
 
 asyncio.run(main())
