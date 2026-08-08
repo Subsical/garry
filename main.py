@@ -64,6 +64,16 @@ async def on_app_command_error(interaction: discord.Interaction, error: app_comm
 	else:
 		raise error
 
+@bot.tree.command(name="optout")
+async def optout(interaction: discord.Interaction):
+	"""Leave the Garry nomination pool. (removes your Nominated role)"""
+	nominated = interaction.guild.get_role(NOMINATED_ROLE_ID)
+	if nominated not in interaction.user.roles:
+		await interaction.response.send_message("You're not currently in the Garry nomination pool.", ephemeral=True)
+		return
+	await interaction.user.remove_roles(nominated)
+	await interaction.response.send_message("You've been removed from the Garry nomination pool.\nYou can be re-nominated later if you opt back in through <#1387840239929790584>.", ephemeral=True)
+
 ########## ======================================================================== ##########
 
 cur.execute("SELECT last_picked FROM Garry")

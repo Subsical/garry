@@ -17,7 +17,7 @@ This database is encrypted at rest and stored on the server that runs the bot (a
 
 To operate, Garry reads the following live from Discord (via the Discord API) on an as-needed basis, and does not persist it:
 
-- Member list, roles, and online/offline status, to determine who is eligible to become "Garry."
+- Member list, roles, and online/offline status, to determine who is eligible to become "Garry." Only members who have opted into the Garry nomination pool (by taking the "Nominated" role) are checked. You can leave the pool at any time with the `/optout` command, which removes your Nominated role and excludes you from future eligibility/presence checks.
 - Message content and attachments sent by the current "Garry" in a specific channel, which are relayed via webhook to a public archive channel in the same server as part of the bot's game mechanic. This content is stored by Discord as ordinary channel messages, governed by Discord's own retention and [Privacy Policy](https://discord.com/privacy), not by Garry separately.
 - Message edit events in that same channel, used to enforce the rule that archived messages can't be edited after posting.
 
