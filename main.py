@@ -88,6 +88,8 @@ GARRY_DELAY = timedelta(hours=1)
 @tasks.loop(seconds=5)
 async def garry():
 	guild = bot.get_guild(GUILD_ID)
+	if guild is None or guild.unavailable:
+		return  # guild cache is empty right after a reconnect, try again next loop
 	garry_role = guild.get_role(GARRY_ROLE_ID)
 	verified_role = guild.get_role(VERIFIED_ROLE_ID)
 	muted_role = guild.get_role(MUTED_ROLE_ID)
@@ -119,7 +121,7 @@ async def garry():
 		nominees = list(nominated.members)
 		random.shuffle(nominees)
 
-		if not no_one_garry:
+		if not no_one_garry and garry_role in cur_garry.roles:
 			try:
 				await cur_garry.remove_roles(garry_role)
 			except (discord.Forbidden, discord.HTTPException) as err:
@@ -135,11 +137,15 @@ async def garry():
 				and member.id not in BLACKLIST
 			)
 
+		next_garry = None
 		for member in nominees:
 			member = guild.get_member(member.id)  # refresh member object
 			if is_eligible(member):
 				next_garry = member
 				break
+
+		if next_garry is None:
+			return
 
 		overwrite = garry_chnl.overwrites_for(garry_role)
 		overwrite.send_messages = True
