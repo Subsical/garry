@@ -1,6 +1,6 @@
 # Garry Bot - Privacy Policy
 
-_Last updated: 2026-08-08_
+_Last updated: 2026-10-04_
 
 Garry is a Discord bot operated for a single Discord server. This policy explains what data it accesses and stores.
 
@@ -31,7 +31,7 @@ Garry does not share, sell, or transmit any stored data to third parties. All da
 
 ## Data Retention & Deletion
 
-The two stored fields (current Garry user ID, last-picked timestamp) are overwritten each time the role rotates and are not retained historically. To request removal of your Discord User ID from the current-Garry field, contact the server administrator.
+The two stored fields (current Garry user ID, last-picked timestamp) are overwritten each time the role rotates and are not retained historically. To request removal of your Discord User ID from the current-Garry field, contact the bot's developer.
 
 ## Changes to This Policy
 
